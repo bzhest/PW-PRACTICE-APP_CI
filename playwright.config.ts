@@ -24,7 +24,17 @@ export default defineConfig<TestOptions>({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [
+    process.env.CI ? ["dot"] : ["list"],
+    [
+      "@argos-ci/playwright/reporter",
+      {
+        // Upload to Argos on CI only.
+        uploadToArgos: !!process.env.CI
+      },
+    ],
+    ['html']
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
@@ -36,8 +46,9 @@ export default defineConfig<TestOptions>({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    //actionTimeout: 20000,
-    //navigationTimeout: 25000,
+    actionTimeout: 20000,
+    navigationTimeout: 25000,
+    screenshot: "only-on-failure",
     video: {
       mode: 'off',
       size: { width: 1920, height: 1080 }
@@ -78,8 +89,8 @@ export default defineConfig<TestOptions>({
     {
       name: 'articleSetup',
       testMatch: 'newArticle.setup.ts',
-      dependencies:['setup'],
-      teardown:'articleCleanUp'
+      dependencies: ['setup'],
+      teardown: 'articleCleanUp'
     },
     {
       name: 'articleCleanUp',
@@ -99,7 +110,7 @@ export default defineConfig<TestOptions>({
     {
       name: 'mobile',
       testMatch: 'testMobile.spec.ts',
-      use:{
+      use: {
         ...devices['iPhone 13 Pro']
       }
     },
@@ -108,12 +119,12 @@ export default defineConfig<TestOptions>({
       name: 'firefox',
       use: { browserName: 'firefox' },
     }, */
-  
+
   ],
 
-  webServer:{
-    command:'npm run start',
-    url:'http://localhost:4200/'
+  webServer: {
+    command: 'npm run start',
+    url: 'http://localhost:4200/'
   }
 
 
