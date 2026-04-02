@@ -5,11 +5,18 @@ on:
   pull_request:
     branches: [ main, master ]
 jobs:
+  print:
+    runs-on: ubuntu-latest
+    steps:
+      - name: print context
+        run: echo "${{toJson(github.event)}}"
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
+    - name: Cache dependencies
+      uses: actions/cache@v5
     - uses: actions/setup-node@v5
       with:
         node-version: 20
